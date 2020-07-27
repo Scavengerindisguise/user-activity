@@ -4,8 +4,9 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import moment from 'moment';
 
-function GetTableBody({ currentUser, todayDate }) {
-    let userActivityDates = currentUser.activity_periods.map(item => {
+
+function getFilteredDates(dates, todayDate) {
+    let userActivityDates = dates.map(item => {
         let startDate = item.start_time.split(' ');
         let endDate = item.end_time.split(' ')
         let startTimeLength = startDate[3].length;
@@ -16,7 +17,7 @@ function GetTableBody({ currentUser, todayDate }) {
         endDate = endDate[2] + '-' + endDate[0] + '-' + endDate[1] + ' ' + endTimeLength;
         startDate = new Date(startDate);
         endDate = new Date(endDate);
-        return { startDate: startDate, endDate: endDate };
+        return { startDate, endDate };
     });
     console.log(userActivityDates);
     userActivityDates = userActivityDates.filter(item => {
@@ -24,19 +25,39 @@ function GetTableBody({ currentUser, todayDate }) {
         console.log(moment(todayDate).format('DD-MM-YYYY'));
         if (moment(item.startDate).format('DD-MM-YYYY') === moment(todayDate).format('DD-MM-YYYY'))
             return item;
+        else
+            return null;
     });
     console.log(userActivityDates);
-    if (userActivityDates.length > 0)
+    return userActivityDates;
+}
+
+function GetTableBody({ todayDate, activityDates }) {
+    //   console.log(todayDate,activityDates);
+    const currentActivityDates = getFilteredDates(activityDates, todayDate);
+    console.log(currentActivityDates);
+    if (currentActivityDates.length === 0)
         return (
             <tr>
-                <td></td>
+                <td className='text-center' colSpan='2'>No results to display</td>
             </tr>
+        ); else
+        return currentActivityDates.map((item) => {
+            return (
+                <>
+                    <tr key={item.startDate}>
+                        <td>{moment(item.startDate).format('MMMM Do YYYY, h:mm:ss')}</td>
+                        <td>{moment(item.endDate).format('MMMM Do YYYY, h:mm:ss')}</td>
+                    </tr>
+                </>
+            )
+        }
         )
 }
 
-const ModalComponent = (props) => {
 
-    // console.log(props);
+const ModalComponent = (props) => {
+    console.log(props);
     return (
         <Modal size='lg' isOpen={props.isModalOpen} toggle={() => props.toggle(props.currentUser)}>
             <ModalHeader toggle={() => props.toggle(props.currentUser)}>User Activity</ModalHeader>
@@ -51,18 +72,17 @@ const ModalComponent = (props) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <GetTableBody currentUser={props.currentUser} todayDate={props.todayDate} />
+                                <GetTableBody todayDate={props.todayDate} activityDates={props.currentUser['activity_periods']} />
                             </tbody>
                         </table>
                     </div>
                     <div className='col-sm-6'>
-                        <Calendar value={props.todayDate} />
+                        <Calendar value={props.todayDate} onChange={props.onChange} />
                     </div>
                 </div>
             </ModalBody>
             <ModalFooter>
-                <Button color="primary" onClick={() => props.toggle(props.currentUser)}>Do Something</Button>{' '}
-                <Button color="secondary" onClick={() => props.toggle(props.currentUser)}>Cancel</Button>
+                <Button color="secondary" size='sm' onClick={() => props.toggle(props.currentUser)}>Close</Button>
             </ModalFooter>
         </Modal>
     );

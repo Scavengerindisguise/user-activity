@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { baseUrl } from '../shared/baseUrl';
-import ModalComponent from '../shared/modal';
+import Modal from './modal';
+
 
 class Main extends Component {
     state = {
@@ -20,15 +21,22 @@ class Main extends Component {
             });
     }
 
-    toggleModal = (user) => {
-        // console.log(user);
-       
+    onSelectUser = (user) => {
+        console.log(user);
+
         this.setState({
             isModalOpen: !this.state.isModalOpen,
             currentUser: user
         });
     }
-  
+
+    onChangeDate = (date) => {
+        console.log(date);
+        this.setState({
+            todayDate: date
+        })
+    };
+
 
     render() {
         return (
@@ -45,14 +53,15 @@ class Main extends Component {
                             </div>
                                 <ul className="list-group list-group-flush">
                                     {this.state.users.map(user => {
-                                        return <li onClick={() => this.toggleModal(user)} key={user.id} className="list-group-item">{user.real_name}</li>
+                                        return <li onClick={() => this.onSelectUser(user)} key={user.id} className="list-group-item">{user.real_name}</li>
                                     })}
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-               <ModalComponent todayDate={this.state.todayDate} isModalOpen = {this.state.isModalOpen} currentUser={this.state.currentUser} toggle={this.toggleModal} />
+                <Modal onChange={this.onChangeDate} todayDate={this.state.todayDate} isModalOpen={this.state.isModalOpen} currentUser={this.state.currentUser} toggle={this.onSelectUser} />
+                {/* <ModalComponent todayDate={this.state.todayDate} isModalOpen = {this.state.isModalOpen} currentUser={this.state.currentUser} toggle={this.toggleModal} /> */}
             </React.Fragment>
         );
     }
